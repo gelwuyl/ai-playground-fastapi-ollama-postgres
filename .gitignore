@@ -16,3 +16,8 @@ venv/
 .worktree-*/
 .vercel
 .env*
+
+# Agent tooling artifacts
+.agents/
+.claude/
+skills-lock.json

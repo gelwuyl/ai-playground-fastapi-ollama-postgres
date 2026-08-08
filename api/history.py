@@ -1,8 +1,8 @@
 """GET /api/history — return recent question-log interactions."""
-import json
-
 from services.interaction_service import fetch_recent_history
+from services.vercel_handler import VercelHandler
 
 
-def handler(request):
-    return json.dumps(fetch_recent_history())
+class handler(VercelHandler):
+    def do_GET(self):
+        return self.json_response(fetch_recent_history())

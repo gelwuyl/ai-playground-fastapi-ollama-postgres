@@ -1,8 +1,7 @@
 """POST /api/story — generate a bedtime story with Gemini, save it."""
-import json
-
 from services.llm_adapter import call_model
 from services.story_service import save_story, fetch_recent_stories
+from services.vercel_handler import VercelHandler
 
 SYSTEM_PROMPT = (
     "You are a warm, imaginative bedtime storyteller for children. "
@@ -11,17 +10,20 @@ SYSTEM_PROMPT = (
 )
 
 
-def handler(request):
-    try:
-        body = request.json()
-    except Exception:
-        return json.dumps({"detail": "Invalid JSON body."}), 400
+class handler(VercelHandler):
+    def do_POST(self):
+        try:
+            body = self.read_json()
+        except Exception:
+            return self.json_response({"detail": "Invalid JSON body."}, 400)
 
-    prompt = (body.get("prompt") or "").strip()
-    if not prompt:
-        return json.dumps({"detail": "Please describe the story you want."}), 400
+        prompt = (body.get("prompt") or "").strip()
+        if not prompt:
+            return self.json_response({"detail": "Please describe the story you want."}, 400)
 
-    story = call_model(prompt, system_prompt=SYSTEM_PROMPT)
-    save_story(prompt, story)
+        story = call_model(prompt, system_prompt=SYSTEM_PROMPT)
+        save_story(prompt, story)
 
-    return json.dumps({"story": story, "history": fetch_recent_stories()})
+        return self.json_response(
+            {"story": story, "history": fetch_recent_stories()}
+        )

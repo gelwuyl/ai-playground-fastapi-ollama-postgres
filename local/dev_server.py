@@ -9,6 +9,7 @@ Usage:
 import importlib
 import json
 import os
+import socket
 import sys
 from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
@@ -44,25 +45,31 @@ class Handler(SimpleHTTPRequestHandler):
         content_length = int(self.headers.get("Content-Length", 0))
         body = self.rfile.read(content_length) if content_length else b""
 
-        class FakeRequest:
-            def json(self):
-                return json.loads(body or b"{}")
+        # Build a raw HTTP request and feed it through a real socket pair so
+        # the BaseHTTPRequestHandler subclass runs exactly as on Vercel.
+        request_line = f"{self.command} {self.path} HTTP/1.1\r\n".encode()
+        header_bytes = b"".join(
+            f"{k}: {v}\r\n".encode() for k, v in self.headers.items()
+        )
+        raw = request_line + header_bytes + b"\r\n" + body
 
+        server_sock, client_sock = socket.socketpair()
         try:
-            result = module.handler(FakeRequest())
-            if isinstance(result, tuple):
-                payload, status = result
-            else:
-                payload, status = result, 200
-            self.send_response(status)
-            self.send_header("Content-Type", "application/json")
-            self.end_headers()
-            self.wfile.write(payload.encode("utf-8"))
-        except Exception as exc:  # noqa: BLE001
-            self.send_response(500)
-            self.send_header("Content-Type", "application/json")
-            self.end_headers()
-            self.wfile.write(json.dumps({"detail": str(exc)}).encode("utf-8"))
+            client_sock.sendall(raw)
+            client_sock.shutdown(socket.SHUT_WR)
+            handler_cls = module.handler
+            handler_cls(server_sock, ("127.0.0.1", 0), self.server)
+            response = client_sock.recv(65536)
+        finally:
+            server_sock.close()
+            client_sock.close()
+
+        header_block, _, body_block = response.partition(b"\r\n\r\n")
+        status = int(header_block.split(b" ", 2)[1])
+        self.send_response(status)
+        self.send_header("Content-Type", "application/json")
+        self.end_headers()
+        self.wfile.write(body_block)
 
     def do_GET(self):
         if self.path.startswith("/api/"):
