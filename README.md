@@ -1,13 +1,17 @@
-# AI Playground — LLM Question Log + Bedtime Story Generator
+# AI Playground — Chat + Bedtime Story Generator
 
 A single, portfolio-ready web project that runs **two apps** from one codebase:
 
-1. **LLM Question Log** — ask a question, get an answer, and keep a history.
+1. **Chat** — ask a question, get an answer, and keep a history.
 2. **Bedtime Story Generator** — generate a gentle bedtime story for kids.
+
+Production URL: https://ai-playground-gel.vercel.app/
+
+Vercel creates a unique deployment URL for every push (for example, `https://ai-playground-fastapi-ollama-postgres-28ftyfl5n-gelwuyl1.vercel.app/`). Those are temporary preview URLs. The canonical public URL for this project is the aliased production domain above.
 
 Both apps share one PostgreSQL database and one LLM backend, and can run in two modes:
 
-- **Local mode** — FastAPI + **Ollama** (local LLM, e.g. `gemma4:12b-mlx`) for offline development.
+- **Local mode** — FastAPI + **Ollama** (local LLM, e.g. `gemma4:e4b-mlx`) for offline development.
 - **Cloud mode** — **Vercel** serverless functions + **Gemini API** for deployment.
 
 An **LLM adapter** (`services/llm_adapter.py`) picks the backend at runtime based on environment variables, so the business logic is shared and not duplicated.
