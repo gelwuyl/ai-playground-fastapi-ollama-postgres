@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Local LLM Question Log</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <h1>Local LLM Question Log</h1>
+    <textarea id="question" rows="3" placeholder="Ask a question…"></textarea>
+    <button id="ask-btn">Ask</button>
+    <div id="answer"></div>
+    <div id="error"></div>
+
+    <h2>Recent</h2>
+    <ol id="history">No questions yet.</ol>
+
+    <script>
+    function renderHistory(items) {
+      const list = document.getElementById("history");
+      if (!items || items.length === 0) {
+        list.innerHTML = "<li>No questions yet.</li>";
+        return;
+      }
+      list.innerHTML = items.map(it =>
+        `<li>
+           <div class="q">${escapeHtml(it.question)}</div>
+           <div class="a">${escapeHtml(it.answer)}</div>
+           <div class="meta">${it.model_name} · ${it.created_at}</div>
+         </li>`
+      ).join("");
+    }
+
+    function escapeHtml(s) {
+      return s.replace(/[&<>"']/g, c => ({
+        "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;", "'": "&#39;"
+      }[c]));
+    }
+
+    async function loadHistory() {
+      const r = await fetch("/history");
+      if (r.ok) renderHistory(await r.json());
+    }
+
+    document.getElementById("ask-btn").addEventListener("click", async () => {
+      const q = document.getElementById("question").value;
+      const errEl = document.getElementById("error");
+      const ansEl = document.getElementById("answer");
+      errEl.textContent = "";
+      ansEl.textContent = "Thinking…";
+      try {
+        const r = await fetch("/ask", {
+          method: "POST",
+          headers: {"Content-Type": "application/json"},
+          body: JSON.stringify({question: q}),
+        });
+        const data = await r.json();
+        if (!r.ok) throw new Error(data.detail || "Request failed");
+        ansEl.textContent = data.answer;
+        renderHistory(data.history);
+      } catch (e) {
+        ansEl.textContent = "";
+        errEl.textContent = e.message;
+      }
+    });
+
+    loadHistory();
+    </script>
+</body>
+</html>
