@@ -1,0 +1,7 @@
+{
+  "rewrites": [
+    { "source": "/question-log", "destination": "/question-log.html" },
+    { "source": "/bedtime-story", "destination": "/bedtime-story.html" },
+    { "source": "/api/(.*)", "destination": "/api/$1" }
+  ]
+}

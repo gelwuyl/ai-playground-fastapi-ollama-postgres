@@ -1,6 +1,16 @@
-venv/
+# Environment
 .env
+.env.local
+
+# Python
 __pycache__/
-*.pyc
+*.py[cod]
+.venv/
+venv/
+
+# Vercel
+.vercel/
+
+# OS
 .DS_Store
 .worktree-*/

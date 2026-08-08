@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bedtime Story Generator</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <div class="container">
+    <a class="back-link" href="/">← Back to AI Playground</a>
+    <h1>🧸 Bedtime Story Generator</h1>
+    <p class="subtitle">Describe an idea and get a gentle, magical bedtime story.</p>
+
+    <textarea id="prompt" rows="3" placeholder="e.g. A brave little fox who learns to share…"></textarea>
+    <button id="story-btn">Generate Story</button>
+    <div id="error"></div>
+    <div id="story"></div>
+
+    <h2>Recent Stories</h2>
+    <ol id="stories"><li>No stories yet.</li></ol>
+  </div>
+
+  <script>
+    function escapeHtml(s) {
+      return s.replace(/[&<>"']/g, c => ({
+        "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;", "'": "&#39;"
+      }[c]));
+    }
+
+    function renderStories(items) {
+      const list = document.getElementById("stories");
+      if (!items || items.length === 0) {
+        list.innerHTML = "<li>No stories yet.</li>";
+        return;
+      }
+      list.innerHTML = items.map(it =>
+        `<li>
+           <div class="p">${escapeHtml(it.prompt)}</div>
+           <div class="s">${escapeHtml(it.story)}</div>
+           <div class="meta">${escapeHtml(it.model_name)} · ${escapeHtml(it.created_at)}</div>
+         </li>`
+      ).join("");
+    }
+
+    async function loadStories() {
+      const r = await fetch("/api/stories");
+      if (r.ok) renderStories(await r.json());
+    }
+
+    document.getElementById("story-btn").addEventListener("click", async () => {
+      const p = document.getElementById("prompt").value;
+      const errEl = document.getElementById("error");
+      const storyEl = document.getElementById("story");
+      const btn = document.getElementById("story-btn");
+      errEl.textContent = "";
+      storyEl.textContent = "Writing your story…";
+      btn.disabled = true;
+      try {
+        const r = await fetch("/api/story", {
+          method: "POST",
+          headers: {"Content-Type": "application/json"},
+          body: JSON.stringify({prompt: p}),
+        });
+        const data = await r.json();
+        if (!r.ok) throw new Error(data.detail || "Request failed");
+        storyEl.textContent = data.story;
+        renderStories(data.history);
+      } catch (e) {
+        storyEl.textContent = "";
+        errEl.textContent = e.message;
+      } finally {
+        btn.disabled = false;
+      }
+    });
+
+    loadStories();
+  </script>
+</body>
+</html>

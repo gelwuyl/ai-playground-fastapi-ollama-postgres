@@ -42,7 +42,7 @@ ok "Database llm_question_log reachable as user 'postgres'"
 table_exists=$(psql "$APP_DSN" -tAc \
     "SELECT 1 FROM information_schema.tables WHERE table_name='interactions'")
 [ "$table_exists" = "1" ] \
-    || fail "Table 'interactions' not found. Apply schema: psql \"$APP_DSN\" -f sql/001_create_interactions.sql"
+    || fail "Table 'interactions' not found. Apply schema: psql \"$APP_DSN\" -f sql/001_create_tables.sql"
 ok "Table interactions exists"
 
 # 7. Ollama reachable.

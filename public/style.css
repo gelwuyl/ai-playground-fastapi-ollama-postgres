@@ -1,0 +1,107 @@
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background: #f5f7fa;
+  color: #1f2933;
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+.container {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 2rem 1.25rem;
+}
+
+h1 { font-size: 1.8rem; margin-bottom: 0.25rem; }
+.subtitle { color: #52606d; margin-bottom: 2rem; }
+
+/* Landing page */
+.app-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.25rem;
+}
+.app-card {
+  display: block;
+  background: #fff;
+  border: 1px solid #e4e7eb;
+  border-radius: 12px;
+  padding: 1.75rem;
+  text-decoration: none;
+  color: inherit;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.app-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+}
+.app-card .icon { font-size: 2.2rem; }
+.app-card h2 { font-size: 1.25rem; margin: 0.5rem 0 0.25rem; }
+.app-card p { color: #52606d; font-size: 0.95rem; }
+
+@media (max-width: 600px) {
+  .app-grid { grid-template-columns: 1fr; }
+}
+
+/* App pages */
+.back-link {
+  display: inline-block;
+  margin-bottom: 1.5rem;
+  color: #2563eb;
+  text-decoration: none;
+  font-size: 0.95rem;
+}
+.back-link:hover { text-decoration: underline; }
+
+textarea {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #cbd2d9;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-family: inherit;
+  resize: vertical;
+}
+
+button {
+  margin-top: 0.75rem;
+  padding: 0.65rem 1.5rem;
+  background: #2563eb;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  cursor: pointer;
+}
+button:hover { background: #1d4ed8; }
+button:disabled { background: #93c5fd; cursor: not-allowed; }
+
+#error { color: #dc2626; margin-top: 0.75rem; }
+#answer, #story {
+  margin-top: 1.25rem;
+  padding: 1rem;
+  background: #fff;
+  border: 1px solid #e4e7eb;
+  border-radius: 8px;
+  white-space: pre-wrap;
+}
+
+h2 { font-size: 1.3rem; margin: 2rem 0 0.75rem; }
+
+#history, #stories { list-style: none; }
+#history li, #stories li {
+  background: #fff;
+  border: 1px solid #e4e7eb;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 0.75rem;
+}
+#history .q, #stories .p { font-weight: 600; }
+#history .a, #stories .s { margin-top: 0.35rem; white-space: pre-wrap; }
+#history .meta, #stories .meta {
+  margin-top: 0.5rem;
+  font-size: 0.8rem;
+  color: #7b8794;
+}
