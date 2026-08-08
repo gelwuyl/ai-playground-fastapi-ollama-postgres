@@ -1,11 +1,10 @@
 # Exclude local-only and heavy files from Vercel deployments
-app/                   # local FastAPI app (used for local testing with Ollama)
+app/
 venv/
 .venv/
 local/
 *.pyc
 __pycache__/
 .env
-.venv/
 *.sqlite3
 *.db
