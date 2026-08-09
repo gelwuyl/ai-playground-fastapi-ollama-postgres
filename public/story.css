@@ -85,3 +85,13 @@ h1 { font-size: clamp(1.75rem, 4vw, 3rem); font-weight: 800; text-shadow: 0 2px 
 .meta-date { font-size: 0.85rem; color: #6b7280; }
 
 @media (max-width: 768px) { .container { padding: 3rem 1.5rem; } h1 { font-size: 2.25rem; } }
+
+/* Ensure readable text on light/white backgrounds (history and story boxes) */
+#story, .story-card, #stories, #stories li, #stories li .p, #stories li .s, #stories li .meta,
+#history, #history li, #history li .q, #history li .a, #history li .meta,
+#answer, #story, .meta-date {
+  color: #111 !important; /* dark text for readability on light cards */
+}
+
+/* Also make sure links inside lists stay visible */
+#history a, #stories a { color: #0b3d91; text-decoration: underline; }
