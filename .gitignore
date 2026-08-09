@@ -21,3 +21,6 @@ venv/
 .agents/
 .claude/
 skills-lock.json
+
+# folder
+fastapi-ollama-postgres/
