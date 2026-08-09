@@ -1,3 +1,6 @@
+/* Landing page & Chat - Modern Night Theme */
+
+
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
@@ -104,4 +107,75 @@ h2 { font-size: 1.3rem; margin: 2rem 0 0.75rem; }
   margin-top: 0.5rem;
   font-size: 0.8rem;
   color: #7b8794;
+}
+
+/* Modern gradient background (purple to green) */
+body {
+  background: linear-gradient(135deg, #667eea 0%, #76b84d 100%);
+  color: #fff;
+}
+
+/* Glassmorphism cards for landing page */
+.app-card {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 24px; /* bigger than 12px */
+}
+
+.app-card:hover {
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15), 0 0 60px rgba(255, 255, 255, 0.2);
+}
+
+.app-card .icon {
+  animation: float 3s ease-in-out infinite;
+}
+
+/* Floating icon animation */
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+/* Enhanced Chat container */
+.chat-container {
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+.question-box {
+  background: #fff;
+  border-radius: 24px;
+  padding: 1.5rem;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+}
+
+#question {
+  border: none;
+  border-radius: 16px;
+  min-height: 100px;
+}
+
+/* Gradient button with transform effects */
+button {
+  background: linear-gradient(135deg, #667eea 0%, #76b84d 100%);
+  box-shadow: 0 4px 12px rgba(102, 127, 234, 0.3);
+}
+
+button:hover:not(:disabled) {
+  transform: translateY(-2px) scale(1.02);
+}
+
+#answer, #story {
+  background: #fff;
+  border-radius: 24px;
+  white-space: pre-wrap;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+   .app-grid { grid-template-columns: 1fr; }
+   h1 { font-size: 2.25rem; }
+   .question-box { width: 100%; }
 }
