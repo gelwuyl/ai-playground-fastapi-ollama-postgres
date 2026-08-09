@@ -179,3 +179,12 @@ button:hover:not(:disabled) {
    h1 { font-size: 2.25rem; }
    .question-box { width: 100%; }
 }
+
+/* Ensure readable text on light/white cards (history, stories, answer, story output) */
+#history, #history li, #history li .q, #history li .a, #history li .meta,
+#stories, #stories li, #stories li .p, #stories li .s, #stories li .meta,
+#answer, #story, .meta-date {
+  color: #111 !important;
+}
+
+#history a, #stories a { color: #0b3d91; text-decoration: underline; }
