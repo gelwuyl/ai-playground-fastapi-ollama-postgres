@@ -97,6 +97,7 @@
       $("trace").appendChild(li);
     }
 
+    // Poll one step. Returns true if the loop should continue, false to stop.
     async function step() {
       const r = await fetch("/api/research_step", {
         method: "POST",
@@ -106,22 +107,33 @@
       const data = await r.json();
       if (!r.ok) {
         $("error").textContent = data.detail || "Step failed.";
-        clearInterval(timer);
-        return;
+        return false;
       }
       renderStep(data.step);
-      $("progress").textContent = `Pages read: ${data.pages_read} / ${data.step_limit} steps used.`;
+      $("progress").textContent = `Pages read: ${data.pages_read} (${data.step_limit}-step limit).`;
 
       if (data.finished) {
-        clearInterval(timer);
         $("report").innerHTML = `<h2>Research Brief</h2><pre>${escapeHtml(data.step.report || "")}</pre>`;
         runEval();
-        return;
+        return false;
       }
       if (data.step.action === "REFUSED" && data.step.step_number > data.step_limit) {
-        clearInterval(timer);
         $("error").textContent = "Run ended: step limit reached without a valid report.";
+        return false;
       }
+      return true;
+    }
+
+    // Self-scheduling loop: only schedule the NEXT poll AFTER the current step
+    // completes, so requests never overlap (prevents duplicate/raced steps).
+    function pollLoop() {
+      step().then((cont) => {
+        if (cont) {
+          timer = setTimeout(pollLoop, 1500);
+        } else {
+          $("start-btn").disabled = false;
+        }
+      });
     }
 
     async function runEval() {
@@ -155,7 +167,8 @@
 
       sessionId = data.session_id;
       $("progress").textContent = "Running…";
-      timer = setInterval(step, 1500);
+      $("start-btn").disabled = true;
+      pollLoop();
     });
   </script>
 </body>
