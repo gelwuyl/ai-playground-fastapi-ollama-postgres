@@ -131,12 +131,16 @@ def build_state_prompt(goal: str, steps: list[dict]) -> str:
         "end it with [no source] instead.\n"
     )
     history = "\n".join(
-        f"STEP {s['step_number']}: {s['action']} {s.get('query') or s.get('url') or ''}\n  -> {s.get('observation', '')}"
+        f"STEP {s['step_number']}: {s['action']} {s.get('query') or s.get('url') or ''}\n  OBSERVATION: {s.get('observation', '')}"
         for s in steps
     ) or "(no steps taken yet)"
+    pages_read = count_pages_read(steps)
     return (
         system
-        + f"\nGOAL: {goal}\n\nWHAT HAS HAPPENED SO FAR:\n{history}\n\nNext action as JSON:"
+        + f"\nGOAL: {goal}\n\nWHAT HAS HAPPENED SO FAR:\n{history}\n\n"
+        + f"Pages read so far: {pages_read} (need {PAGE_LIMIT} to FINISH).\n"
+        + "Pick a URL from the search results above that you have NOT read yet, and choose READ.\n"
+        + "Only choose FINISH after reading at least 3 pages.\n\nNext action as JSON:"
     )
 
 
