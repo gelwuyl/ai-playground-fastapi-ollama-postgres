@@ -45,7 +45,7 @@
     }
 
     async function step() {
-      const r = await fetch("/api/research/step", {
+      const r = await fetch("/api/research_step", {
         method: "POST",
         headers: {"Content-Type": "application/json"},
         body: JSON.stringify({session_id: sessionId}),
@@ -72,7 +72,7 @@
     }
 
     async function runEval() {
-      const r = await fetch("/api/research/eval", {
+      const r = await fetch("/api/research_eval", {
         method: "POST",
         headers: {"Content-Type": "application/json"},
         body: JSON.stringify({session_id: sessionId}),
@@ -92,7 +92,7 @@
       $("eval").innerHTML = "";
       if (!q) { $("error").textContent = "Enter a question."; return; }
 
-      const r = await fetch("/api/research/start", {
+      const r = await fetch("/api/research_start", {
         method: "POST",
         headers: {"Content-Type": "application/json"},
         body: JSON.stringify({query: q}),
