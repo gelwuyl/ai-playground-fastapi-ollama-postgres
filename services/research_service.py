@@ -112,6 +112,9 @@ FINISH  Write the report. Only choose this after you have read at least three
         shop pages and product listings give you a number but no explanation, so
         prefer news articles, analysis and official sources when you choose what
         to read.
+        End your report with a paragraph that starts with the word
+        "Recommendation:" and gives a clear, specific recommendation based on
+        the evidence you gathered.
         Call with: {{"action": "FINISH", "report": "..."}}
 """
 
