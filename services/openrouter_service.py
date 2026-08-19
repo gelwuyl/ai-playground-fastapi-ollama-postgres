@@ -7,6 +7,8 @@ guide's Prompt 1 describes.
 import os
 import json
 import re
+import time
+import random
 import httpx
 
 OPENROUTER_API_KEY = os.environ.get("OPENROUTER_API_KEY", "")
@@ -18,6 +20,57 @@ USER_AGENT = (
     "(KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
 )
 
+MAX_RETRIES = 5
+BASE_DELAY = 1.0  # seconds
+
+
+def _headers() -> dict:
+    return {
+        "Authorization": f"Bearer {OPENROUTER_API_KEY}",
+        "Content-Type": "application/json",
+        "User-Agent": USER_AGENT,
+    }
+
+
+def _post_with_retry(payload: dict) -> httpx.Response:
+    """POST to OpenRouter with exponential backoff on 429/5xx.
+
+    Honors the Retry-After header when present; otherwise uses exponential
+    backoff (BASE_DELAY * 2^attempt) plus a small random jitter to avoid
+    thundering herd. Raises for non-retryable errors (401, 400, etc.).
+    """
+    for attempt in range(MAX_RETRIES):
+        resp = httpx.post(
+            OPENROUTER_BASE_URL,
+            headers=_headers(),
+            json=payload,
+            timeout=60,
+        )
+
+        if resp.status_code == 200:
+            return resp
+
+        if resp.status_code == 429:
+            retry_after = resp.headers.get("retry-after")
+            if retry_after:
+                sleep_time = float(retry_after)
+            else:
+                sleep_time = (BASE_DELAY * (2 ** attempt)) + random.uniform(0.1, 0.5)
+            print(f"Rate limited (429). Waiting {sleep_time:.2f}s before retry {attempt + 1}/{MAX_RETRIES}.")
+            time.sleep(sleep_time)
+            continue
+
+        if resp.status_code >= 500:
+            sleep_time = BASE_DELAY * (2 ** attempt)
+            print(f"Server error {resp.status_code}. Waiting {sleep_time:.2f}s before retry {attempt + 1}/{MAX_RETRIES}.")
+            time.sleep(sleep_time)
+            continue
+
+        # Non-retryable error (401, 400, 404, etc.)
+        resp.raise_for_status()
+
+    raise RuntimeError("Failed after maximum retries due to rate limits.")
+
 
 def call_openrouter(prompt: str, system_prompt: str | None = None) -> str:
     """Send a prompt to OpenRouter and return the text response."""
@@ -26,17 +79,7 @@ def call_openrouter(prompt: str, system_prompt: str | None = None) -> str:
         messages.append({"role": "system", "content": system_prompt})
     messages.append({"role": "user", "content": prompt})
 
-    resp = httpx.post(
-        OPENROUTER_BASE_URL,
-        headers={
-            "Authorization": f"Bearer {OPENROUTER_API_KEY}",
-            "Content-Type": "application/json",
-            "User-Agent": USER_AGENT,
-        },
-        json={"model": OPENROUTER_MODEL, "messages": messages},
-        timeout=60,
-    )
-    resp.raise_for_status()
+    resp = _post_with_retry({"model": OPENROUTER_MODEL, "messages": messages})
     return resp.json()["choices"][0]["message"]["content"]
 
 
@@ -70,17 +113,7 @@ def call_openrouter_json(prompt: str, system_prompt: str | None, schema: dict) -
     last_err = None
     for _ in range(3):
         try:
-            resp = httpx.post(
-                OPENROUTER_BASE_URL,
-                headers={
-                    "Authorization": f"Bearer {OPENROUTER_API_KEY}",
-                    "Content-Type": "application/json",
-                    "User-Agent": USER_AGENT,
-                },
-                json=body,
-                timeout=60,
-            )
-            resp.raise_for_status()
+            resp = _post_with_retry(body)
             text = resp.json()["choices"][0]["message"]["content"]
             text = _strip_fences(text)
             return json.loads(text)
