@@ -6,7 +6,7 @@ Run: python test_research_engine.py
 """
 import os
 os.environ["USE_FIXTURES"] = "1"  # use canned search/read results
-os.environ.setdefault("GEMINI_API_KEY", "test-dummy-key")  # gemini_service reads at import
+os.environ.setdefault("OPENROUTER_API_KEY", "test-dummy-key")  # openrouter_service reads at import
 
 from services import research_engine as engine
 from services import research_service as rs

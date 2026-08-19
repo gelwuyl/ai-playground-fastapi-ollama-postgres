@@ -1,15 +1,15 @@
-"""GET /api/healthz — report Gemini and Postgres connectivity."""
+"""GET /api/healthz — report OpenRouter and Postgres connectivity."""
 from services.database import get_conn
 from services.vercel_handler import VercelHandler
 
 
 class handler(VercelHandler):
     def do_GET(self):
-        status = {"gemini": False, "postgres": False}
+        status = {"openrouter": False, "postgres": False}
 
         try:
-            from services.gemini_service import GEMINI_API_KEY
-            status["gemini"] = bool(GEMINI_API_KEY)
+            from services.openrouter_service import OPENROUTER_API_KEY
+            status["openrouter"] = bool(OPENROUTER_API_KEY)
         except Exception:
             pass
 

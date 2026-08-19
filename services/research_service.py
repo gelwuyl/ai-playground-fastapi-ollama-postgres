@@ -137,10 +137,10 @@ def build_state_prompt(goal: str, steps: list[dict]) -> str:
 
 
 def decide_action(goal: str, steps: list[dict]) -> dict:
-    """Ask Gemini for the next action. Returns a parsed dict."""
-    from services.gemini_service import call_gemini_json  # lazy: keeps module SDK-free at import
+    """Ask the model for the next action. Returns a parsed dict."""
+    from services.openrouter_service import call_openrouter_json  # lazy: keeps module SDK-free at import
     prompt = build_state_prompt(goal, steps)
-    return call_gemini_json(prompt, system_prompt=None, schema=ACTION_SCHEMA)
+    return call_openrouter_json(prompt, system_prompt=None, schema=ACTION_SCHEMA)
 
 
 def count_pages_read(steps: list[dict]) -> int:
