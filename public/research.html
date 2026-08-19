@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mr. Kaypoh — Research Agent</title>
+  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/story.css">
+</head>
+<body>
+  <div class="container">
+    <a class="back-link" href="/">← Back to AI Playground</a>
+    <h1>🔎 Mr. Kaypoh</h1>
+    <p class="subtitle">A research agent that searches, reads, and reports with sources.</p>
+
+    <textarea id="query" rows="3" placeholder="Ask a research question needing current evidence…"></textarea>
+    <button id="start-btn">Start Research</button>
+    <div id="error"></div>
+
+    <div id="progress"></div>
+    <ol id="trace"></ol>
+    <div id="report"></div>
+    <div id="eval"></div>
+  </div>
+
+  <script>
+    const $ = (id) => document.getElementById(id);
+    let sessionId = null;
+    let timer = null;
+
+    function escapeHtml(s) {
+      return (s || "").replace(/[&<>"']/g, c => ({
+        "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+      }[c]));
+    }
+
+    function renderStep(s) {
+      const li = document.createElement("li");
+      const meta = s.url ? ` <span class="meta">${escapeHtml(s.url)}</span>` :
+                   s.query ? ` <span class="meta">${escapeHtml(s.query)}</span>` : "";
+      li.innerHTML = `<div class="q"><strong>STEP ${s.step_number} · ${escapeHtml(s.action)}</strong>${meta}</div>` +
+                     `<div class="a">${escapeHtml(s.reason || "")}</div>` +
+                     `<div class="meta">${escapeHtml(s.observation || "")}</div>`;
+      $("trace").appendChild(li);
+    }
+
+    async function step() {
+      const r = await fetch("/api/research/step", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({session_id: sessionId}),
+      });
+      const data = await r.json();
+      if (!r.ok) {
+        $("error").textContent = data.detail || "Step failed.";
+        clearInterval(timer);
+        return;
+      }
+      renderStep(data.step);
+      $("progress").textContent = `Pages read: ${data.pages_read} / ${data.step_limit} steps used.`;
+
+      if (data.finished) {
+        clearInterval(timer);
+        $("report").innerHTML = `<h2>Research Brief</h2><pre>${escapeHtml(data.step.report || "")}</pre>`;
+        runEval();
+        return;
+      }
+      if (data.step.action === "REFUSED" && data.step.step_number > data.step_limit) {
+        clearInterval(timer);
+        $("error").textContent = "Run ended: step limit reached without a valid report.";
+      }
+    }
+
+    async function runEval() {
+      const r = await fetch("/api/research/eval", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({session_id: sessionId}),
+      });
+      const data = await r.json();
+      if (!r.ok) return;
+      $("eval").innerHTML = `<h2>Evaluation: ${data.score}/${data.total}</h2><ul>` +
+        data.checks.map(c => `<li class="${c.pass ? 'pass' : 'fail'}">${c.pass ? 'PASS' : 'FAIL'} — ${escapeHtml(c.name)}</li>`).join("") +
+        `</ul>`;
+    }
+
+    $("start-btn").addEventListener("click", async () => {
+      const q = $("query").value.trim();
+      $("error").textContent = "";
+      $("trace").innerHTML = "";
+      $("report").innerHTML = "";
+      $("eval").innerHTML = "";
+      if (!q) { $("error").textContent = "Enter a question."; return; }
+
+      const r = await fetch("/api/research/start", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({query: q}),
+      });
+      const data = await r.json();
+      if (!r.ok) { $("error").textContent = data.detail || "Start failed."; return; }
+
+      sessionId = data.session_id;
+      $("progress").textContent = "Running…";
+      timer = setInterval(step, 1500);
+    });
+  </script>
+</body>
+</html>
