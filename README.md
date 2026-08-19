@@ -6,10 +6,6 @@ A single, portfolio-ready web project that runs **three apps** from one codebase
 2. **Bedtime Story Generator** — generate a gentle bedtime story for kids.
 3. **Mr. Kaypoh — Research Agent** — an agentic AI that searches the web, reads pages, and writes a sourced research brief using a ReAct loop.
 
-Production URL: https://ai-playground-gel.vercel.app/
-
-Vercel creates a unique deployment URL for every push (for example, `https://ai-playground-fastapi-ollama-postgres-28ftyfl5n-gelwuyl1.vercel.app/`). Those are temporary preview URLs. The canonical public URL for this project is the aliased production domain above.
-
 Both apps share one PostgreSQL database and one LLM backend, and can run in two modes:
 
 - **Local mode** — FastAPI + **Ollama** (local LLM, e.g. `gemma4:e4b-mlx`) for offline development.
@@ -17,7 +13,7 @@ Both apps share one PostgreSQL database and one LLM backend, and can run in two 
 
 An **LLM adapter** (`services/llm_adapter.py`) picks the backend at runtime based on environment variables, so the business logic is shared and not duplicated.
 
-Mr. Kaypoh uses a **client-driven ReAct loop**: the browser polls `POST /api/research_step` repeatedly, and each call executes exactly one tool action (SEARCH or READ) and persists it to Postgres. This keeps each serverless invocation short and gives the user a live trace. A 3-page gate is enforced server-side — the agent cannot FINISH until it has read at least three different web pages.
+Mr. Kaypoh is a **ReAct research agent** (Reason + Act, after Yao et al. 2022). It runs a **client-driven loop**: the browser polls `POST /api/research_step` repeatedly, and each call executes exactly one tool action — **SEARCH** (SerpApi), **READ** (httpx + BeautifulSoup, capped at 5000 chars), or **FINISH** (write a sourced brief) — and persists it to Postgres. This keeps each serverless invocation short and gives the user a live trace. Safeguards are enforced server-side, not by the model: a **3-page gate** blocks FINISH until at least three different pages are read, duplicate URLs are refused, and a step limit (10) is hard-enforced. Every finding must end with a source URL in brackets or `[no source]`, and the brief prints two separate lists: **Pages read** and **Also found** (not opened). Evaluation runs 6 checks (search used, >1 source, within step limit, has recommendation, ≥3 sources, no `[no source]`). Set `USE_FIXTURES=1` to use saved SerpApi results instead of live queries.
 
 ## Architecture
 
@@ -155,37 +151,6 @@ The `.vercelignore` excludes `app/`, `local/`, and `venv/` so only the serverles
 | GET | `/api/research_status` | Get session + all steps (refresh recovery) |
 | POST | `/api/research_eval` | Run 6 evaluation checks on a completed session |
 | GET | `/api/healthz` | Health check (OpenRouter + Postgres) |
-
-## Mr. Kaypoh — how it works
-
-Mr. Kaypoh is a **ReAct research agent** (Reason + Act, after Yao et al. 2022). It is not a chatbot — it runs an autonomous loop:
-
-1. **SEARCH** the web via SerpApi for relevant sources.
-2. **READ** individual web pages (httpx + BeautifulSoup, capped at 5000 chars).
-3. **FINISH** by writing a research brief with sourced findings.
-
-The loop is **client-driven**: the browser calls `POST /api/research_step` once per action, and each call:
-- Loads the session + prior steps from Postgres (the agent's memory).
-- Asks the model (via OpenRouter JSON mode) for the next action.
-- Executes exactly one tool (search or read).
-- Persists the step to `research_steps` and returns it to the browser.
-
-**Safeguards enforced server-side (not by the model):**
-- The agent cannot FINISH until it has read at least **3 different web pages**.
-- Duplicate URL reads are refused.
-- The step limit (10) is hard-enforced — if exceeded, the session is marked FAILED.
-- Every finding must end with a source URL in brackets, or `[no source]`.
-- The brief prints two separate source lists: **Pages read** and **Also found** (not opened).
-
-**Evaluation (6 checks):**
-1. Search tool used at least once.
-2. More than one distinct source consulted.
-3. Run stayed within the step limit.
-4. Brief contains a recommendation.
-5. Brief lists at least three sources.
-6. No finding ends with `[no source]`.
-
-**Fallback:** Set `USE_FIXTURES=1` to use saved SerpApi results (no quota consumed).
 
 ## License
 
