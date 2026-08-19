@@ -127,7 +127,7 @@ def build_state_prompt(goal: str, steps: list[dict]) -> str:
         "end it with [no source] instead.\n"
     )
     history = "\n".join(
-        f"STEP {s['step_number']}: {s['action']} {s.get('query') or s.get('url') or ''} -> {s.get('observation', '')[:120]}"
+        f"STEP {s['step_number']}: {s['action']} {s.get('query') or s.get('url') or ''}\n  -> {s.get('observation', '')}"
         for s in steps
     ) or "(no steps taken yet)"
     return (

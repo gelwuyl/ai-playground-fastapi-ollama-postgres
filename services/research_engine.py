@@ -46,7 +46,10 @@ def run_one_step(session: dict, steps: list[dict]) -> dict:
     if act == "SEARCH":
         q = action.get("query", "")
         results = rs.search_web(q)
-        summary = f"{len(results)} results"
+        result_lines = [f"{len(results)} results:"] + [
+            f"  {i+1}. {r['title']} — {r['url']}" for i, r in enumerate(results)
+        ]
+        summary = "\n".join(result_lines)
         return {
             "step_number": step_number,
             "reason": reason,
@@ -72,7 +75,10 @@ def run_one_step(session: dict, steps: list[dict]) -> dict:
                 "chars_read": 0,
             }
         text, chars = rs.read_webpage(url)
-        summary = f"{chars} chars" if chars > 0 else "0 chars (refused)"
+        if chars > 0:
+            summary = f"{chars} chars read:\n{text[:1500]}"
+        else:
+            summary = "0 chars (refused)"
         return {
             "step_number": step_number,
             "reason": reason,
