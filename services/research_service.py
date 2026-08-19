@@ -7,7 +7,7 @@ import os
 import httpx
 from bs4 import BeautifulSoup
 
-STEP_LIMIT = 8
+STEP_LIMIT = 10
 PAGE_LIMIT = 3
 PAGE_TEXT_LIMIT = 5000
 SEARCH_RESULTS = 5
