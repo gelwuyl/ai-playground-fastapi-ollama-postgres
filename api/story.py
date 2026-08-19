@@ -1,4 +1,4 @@
-"""POST /api/story — generate a bedtime story with Gemini, save it."""
+"""POST /api/story — generate a bedtime story with OpenRouter, save it."""
 from services.llm_adapter import call_model
 from services.story_service import save_story, fetch_recent_stories
 from services.vercel_handler import VercelHandler

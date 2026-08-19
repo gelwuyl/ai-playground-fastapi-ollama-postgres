@@ -1,4 +1,4 @@
-"""POST /api/ask — ask a question, get a Gemini answer, save to history."""
+"""POST /api/ask — ask a question, get an OpenRouter answer, save to history."""
 from services.llm_adapter import call_model
 from services.interaction_service import save_interaction, fetch_recent_history
 from services.vercel_handler import VercelHandler

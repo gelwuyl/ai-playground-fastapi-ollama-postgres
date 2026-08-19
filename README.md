@@ -1,9 +1,9 @@
-# AI Playground — Chat + Bedtime Story + Mr. Kaypoh Research Agent
+# AI Playground — Little Miss Chatterbox + Little Miss Magic + Mr. Kaypoh Research Agent
 
 A single, portfolio-ready web project that runs **three apps** from one codebase:
 
-1. **Chat** — ask a question, get an answer, and keep a history.
-2. **Bedtime Story Generator** — generate a gentle bedtime story for kids.
+1. **Little Miss Chatterbox** — non-stop talking: ask a question, get an answer, and keep a history.
+2. **Little Miss Magic** — boundless imagination: generate a gentle bedtime story for kids.
 3. **Mr. Kaypoh — Research Agent** — an agentic AI that searches the web, reads pages, and writes a sourced research brief using a ReAct loop.
 
 Both apps share one PostgreSQL database and one LLM backend, and can run in two modes:
@@ -20,8 +20,8 @@ Mr. Kaypoh is a **ReAct research agent** (Reason + Act, after Yao et al. 2022). 
 ```mermaid
 flowchart LR
     B[Browser] --> L[Landing page]
-    L --> Q[Question Log]
-    L --> S[Bedtime Story]
+    L --> Q[Little Miss Chatterbox]
+    L --> S[Little Miss Magic]
     L --> R[Mr. Kaypoh]
     Q --> A[LLM adapter]
     S --> A
@@ -50,8 +50,8 @@ api/                       # Vercel serverless route handlers
   research_eval.py         # POST /api/research_eval   (6 checks + score)
 public/                    # Static pages (plain HTML/CSS/JS)
   index.html               # Landing page with three app cards
-  question-log.html        # LLM Question Log UI
-  bedtime-story.html       # Bedtime Story Generator UI
+  question-log.html        # Little Miss Chatterbox UI
+  bedtime-story.html       # Little Miss Magic UI
   research.html            # Mr. Kaypoh Research Agent UI (live trace)
   style.css
 services/                  # Shared logic
@@ -139,8 +139,8 @@ The `.vercelignore` excludes `app/`, `local/`, and `venv/` so only the serverles
 | Method | Path | Description |
 |---|---|---|
 | GET | `/` | Landing page (three app cards) |
-| GET | `/question-log` | Question Log UI |
-| GET | `/bedtime-story` | Bedtime Story UI |
+| GET | `/question-log` | Little Miss Chatterbox UI |
+| GET | `/bedtime-story` | Little Miss Magic UI |
 | GET | `/research` | Mr. Kaypoh Research Agent UI (live trace) |
 | POST | `/api/ask` | Ask a question, get an answer |
 | GET | `/api/history` | List recent interactions |
