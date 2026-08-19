@@ -6,7 +6,7 @@ A single, portfolio-ready web project that runs **three apps** from one codebase
 2. **Little Miss Magic** — boundless imagination: generate a gentle bedtime story for kids.
 3. **Mr. Kaypoh — Research Agent** — an agentic AI that searches the web, reads pages, and writes a sourced research brief using a ReAct loop.
 
-Both apps share one PostgreSQL database and one LLM backend, and can run in two modes:
+All three apps share one PostgreSQL database and one LLM backend, and can run in two modes:
 
 - **Local mode** — FastAPI + **Ollama** (local LLM, e.g. `gemma4:e4b-mlx`) for offline development.
 - **Cloud mode** — **Vercel** serverless functions + **OpenRouter API** (OpenAI-compatible) for deployment.
