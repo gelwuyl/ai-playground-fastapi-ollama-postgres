@@ -72,7 +72,11 @@ def read_webpage(url: str) -> tuple[str, int]:
         return text[:PAGE_TEXT_LIMIT], len(text[:PAGE_TEXT_LIMIT])
 
     try:
-        r = httpx.get(url, headers={"User-Agent": USER_AGENT}, timeout=30, follow_redirects=True)
+        r = httpx.get(url, headers={
+            "User-Agent": USER_AGENT,
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+            "Accept-Language": "en-US,en;q=0.9",
+        }, timeout=30, follow_redirects=True)
     except Exception as e:
         print(f"Page fetch failed: {url}: {type(e).__name__}: {e}")
         return "", 0

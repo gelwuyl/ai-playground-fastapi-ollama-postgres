@@ -45,7 +45,8 @@ def _persist(session_id, step):
                     "UPDATE research_sessions SET status='COMPLETED', final_report=%s WHERE id=%s",
                     (step.get("report", ""), session_id),
                 )
-            elif step["action"] == "REFUSED" and step["step_number"] > rs.STEP_LIMIT:
+            elif step["step_number"] >= rs.STEP_LIMIT:
+                # Step limit reached (whether REFUSED or not) -> FAILED
                 cur.execute("UPDATE research_sessions SET status='FAILED' WHERE id=%s", (session_id,))
             else:
                 cur.execute("UPDATE research_sessions SET status='RUNNING' WHERE id=%s", (session_id,))
